@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>ShuYuan Zhang</title>
+  <style>
+    body {
+      background-image: url('background.jpg');
+      display: flex;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+
+    table {
+      color: black;
+      background-color: aliceblue;
+      border-collapse: collapse;
+      border-spacing: 0;
+      height: 50vh;
+      width: 80vh;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      padding: 5px;
+      border: 1px solid orangered;
+      font-size: 2em;
+    }
+
+    h1 {
+      font-size: 3em;
+    }
+
+    h2 {
+      font-size: 2em;
+    }
+
+    button {
+      height: 150px;
+      width: 300px;
+      font-size: 2.0em;
+    }
+
+    #doc1,
+    #doc2,
+    #save-btn,
+    #function-btn,
+    #wf-btn,
+    #quit-btn,
+    #back-btn,
+    #table,
+    #p1,
+    #h3,
+    #p2 {
+      display: none;
+    }
+
+    #save-btn,
+    #function-btn,
+    #back-btn {
+      font-size: 1em;
+      height: 50px;
+      width: 100px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Compare two documents</h1>
+  <h2>——ShuYuan Zhang</h2>
+  <h3 id = "h3"></h3>
+  <button onclick="topage2()" id="start-btn">Start !</button>
+  <div id="table"></div>
+  <textarea id="doc1" rows="25" cols="100">
+    DOC1( delete me when you enter )
+  </textarea>
+
+  <textarea id="doc2" rows="25" cols="100">
+    DOC2( delete me when you enter )
+  </textarea>
+  <button onclick="makedic()" id="save-btn">Save</button>
+  <button onclick="topage3()" id="function-btn">Select function</button>
+  <button onclick="towf()" id="wf-btn">Word Freq</button>
+  <button onclick="topage1()" id="quit-btn" id="quit-btn">Quit!</button>
+  <button onclick="topage3()" id="back-btn">Back!</button>
+
+
+
+</body>
+<script>
+  let h1 = document.querySelector('h1');
+  let h2 = document.querySelector('h2');
+  let h3 = document.querySelector('h3');
+  let saveButton = document.querySelector('#save-btn');
+  let functionButton = document.querySelector('#function-btn');
+  let startButton = document.querySelector('#start-btn');
+  let wfButton = document.querySelector('#wf-btn');
+  let quitButton = document.querySelector('#quit-btn');
+  let doc1box = document.querySelector('#doc1');
+  let doc2box = document.querySelector('#doc2');
+  let backButton = document.querySelector('#back-btn');
+  let save = document.querySelector("#save-btn");
+  let sortedDoc1 = {};
+  let sortedDoc2 = {};
+
+  function makedic() {
+    let doc1Text = document.querySelector('#doc1').value;
+    let doc2Text = document.querySelector('#doc2').value;
+    let string1 = doc1Text.replace(/[^\w\s']|/g, "").replace(/\s+/g, ' ');
+    let string2 = doc2Text.replace(/[^\w\s']|/g, "").replace(/\s+/g, ' ');
+    string1 = string1.trim().toLowerCase();
+    string2 = string2.trim().toLowerCase();
+    let doc1Words = string1.split(' ');
+    let doc2Words = string2.split(' ');
+    let doc1Frequency = {};
+    let doc2Frequency = {};
+    let doc1Sum = 0
+    let doc2Sum = 0
+    let tolSum = 0
+    let similar = 0
+
+
+    for (let i = 0; i < doc1Words.length; i++) {
+      let word1 = doc1Words[i];
+      if (doc1Frequency[word1] == null) {
+        doc1Frequency[word1] = 1;
+      } else {
+        doc1Frequency[word1] += 1;
+      }
+    }
+    for (let i = 0; i < doc2Words.length; i++) {
+      let word2 = doc2Words[i];
+      if (doc2Frequency[word2] == null) {
+        doc2Frequency[word2] = 1;
+      } else {
+        doc2Frequency[word2] += 1;
+      }
+    }
+// Extract all words and generate a dic
+    function compareDicts(dict1, dict2) {
+      for (let key in dict1) {
+        if (dict2.hasOwnProperty(key)) {
+          continue;
+        } else {
+          dict2[key] = 0;
+        }
+      }
+      for (let key in dict2) {
+        if (dict1.hasOwnProperty(key)) {
+          continue;
+        } else {
+          dict1[key] = 0;
+        }
+      }
+//  compare and generate corresponding values (if there is no such key in a dic, generate a key and let it be 0)
+      for (let key in dict1) {
+        var value = dict1[key];
+        tolSum += dict1[key] * dict2[key];
+        doc1Sum += value;        
+      }
+      for (let key in dict2) {
+        var value = dict2[key];
+        doc2Sum += value;        
+      }
+//  calculate all the values
+      similar = tolSum/Math.sqrt(doc1Sum)/Math.sqrt(doc2Sum)
+      similar = similar*100
+      similar = Math.floor(similar);
+      console.log(doc1Sum,doc2Sum,tolSum,similar)
+//  calculate similar
+      h3.innerText = similar+"% similar";
+    }
+
+    compareDicts(doc1Frequency, doc2Frequency)
+    let sortedKeys1 = Object.keys(doc1Frequency).sort();
+    let sortedKeys2 = Object.keys(doc2Frequency).sort();
+    sortedKeys1.forEach(function (key) {
+      sortedDoc1[key] = doc1Frequency[key];
+    });
+    sortedKeys2.forEach(function (key) {
+      sortedDoc2[key] = doc2Frequency[key];
+    });
+    console.log(sortedDoc1)
+    console.log(sortedDoc2)
+  }
+//sorted 2 dic
+
+  function topage3() {
+    doc1box.style.display = 'none';
+    doc2box.style.display = 'none';
+    saveButton.style.display = 'none';
+    functionButton.style.display = 'none';
+    backButton.style.display = 'none';
+    wfButton.style.display = 'block';
+    quitButton.style.display = 'block';
+    document.querySelector("#table").style.display = "none";
+    h3.style.display = 'none';
+  }
+
+  function topage2() {
+    startButton.style.display = 'none';
+    h1.style.display = 'none';
+    h2.style.display = 'none';
+    doc1box.style.display = 'block';
+    doc2box.style.display = 'block';
+    saveButton.style.display = 'block';
+    functionButton.style.display = 'block';
+
+  }
+
+  function topage1() {
+    startButton.style.display = 'block';
+    h1.style.display = 'block';
+    h2.style.display = 'block';
+    wfButton.style.display = 'none';
+    quitButton.style.display = 'none';
+    document.getElementById("table").innerHTML = "";
+    wordFrequencyArray = [];
+    wordFrequency = {};
+
+  }
+
+  function towf() {
+    quitButton.style.display = 'none';
+    wfButton.style.display = 'none';
+    backButton.style.display = 'block';
+    h3.style.display = 'block';
+    createTable();
+  }
+
+  function createTable() {
+    let table = document.createElement('table');
+    let thead = document.createElement('thead');
+    let headerRow = document.createElement('tr');
+    let th1 = document.createElement('th');
+    th1.textContent = 'Word';
+    headerRow.appendChild(th1);
+
+    let th2 = document.createElement('th');
+    th2.textContent = 'Doc 1 Frequency';
+    headerRow.appendChild(th2);
+
+    let th3 = document.createElement('th');
+    th3.textContent = 'Doc 2 Frequency';
+    headerRow.appendChild(th3);
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+//  creat a  table and append dco1 and doc2 into it
+    let tbody = document.createElement('tbody');
+    for (let key in sortedDoc1) {
+      let row = document.createElement('tr');
+
+      let tdWord = document.createElement('td');
+      tdWord.textContent = key;
+      row.appendChild(tdWord);
+
+      let tdDoc1Freq = document.createElement('td');
+      tdDoc1Freq.textContent = sortedDoc1[key];
+      row.appendChild(tdDoc1Freq);
+
+      let tdDoc2Freq = document.createElement('td');
+      tdDoc2Freq.textContent = sortedDoc2[key];
+      row.appendChild(tdDoc2Freq);
+
+      tbody.appendChild(row);
+    }
+    table.appendChild(tbody);
+
+    document.querySelector("#table").innerHTML = "";
+    document.querySelector("#table").appendChild(table);
+    document.querySelector("#table").style.display = "block";
+  }
+</script>
+
+</html>
